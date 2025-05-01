@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hangman</title>
+    <!-- Connects to my style.css and grabs the url for the file so it can be used by Flask-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body style="background-color:rgb(184, 227, 233);">
+
+    <h1 style="text-align: center;">Hangman</h1>
+
+    <script>
+        /*Function to start the game, updates display and resets remaining guesses by calling startGame() in game.py*/
+        function startGame(){
+            fetch('/startGame')
+            .then(response => response.json())
+            .then(data => {
+                updateDisplay(data.display);
+                updateRemainingGuesses(data.remaining_guesses);
+            });
+        }
+
+        /* For when the user makes a guess by clicking the letters. Calls makeGuess from game.py through */
+        function makeGuess(letter) {
+            fetch('/guess', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ letter: letter }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateDisplay(data.display);
+                updateRemainingGuesses(data.remaining_guesses);
+                /*Check status to see if game was won or lost, and stop game based on which one if applicable*/
+                if (data.status === 'win') {
+                    alert('Victory!');
+                } else if (data.status === 'loss') {
+                    alert('Defeat! The word was: ' + data.word);
+                }
+            });
+        }
+
+        /*Essentially it locates the html element with the word-display ID and updates its text so that guessed letters can be seen*/
+        function updateDisplay(display) {
+            document.querySelector('#word-display').textContent = display;
+        }
+
+        /*Update number of remainign guesses and call update to image*/
+        function updateRemainingGuesses(remaining) {
+            document.getElementById('remaining').textContent = "Remaining Guesses: " + remaining;
+            updateHangmanImage(remaining); // Call image update here
+        }
+
+        /*Updates the image after each incorrect guess*/
+        function updateHangmanImage(remaining) {
+            // Technically starts at -1, but since in imagePath we have imageNum + 1, incremenets to zero so it displays stand0 (the first hangman image)
+            const imageNum = 5 - remaining;
+            const imagePath = `/static/images/stand${imageNum + 1}.png`; // updates image so that each wrong guess adds one
+            document.getElementById('hangman-image').src = imagePath;
+        }
+
+        // Automatically start game when page loads
+        window.onload = startGame;
+    </script>
+
+    <!--Changing image for the game-->
+    <img id="hangman-image" src="{{ url_for('static', filename='images/stand0.png') }}" style="display: block; margin-left: auto; width: 350px; margin-right: auto; margin-bottom: 0%;">
+
+    <!-- Shows the blanks and updates with correctly guessed letters-->
+    <h2 id="word-display" style="text-align: center; font-size: 100px; margin-top: 0%; margin-bottom: 3%;">_ _ _ _ _ _</h2>
+
+
+    <!--The buttons relating to each letter for user to use to guess-->
+    <div class="button-container">
+        <button onclick="makeGuess('A')">A</button>
+        <button onclick="makeGuess('B')">B</button>
+        <button onclick="makeGuess('C')">C</button>
+        <button onclick="makeGuess('D')">D</button>
+        <button onclick="makeGuess('E')">E</button>
+        <button onclick="makeGuess('F')">F</button>
+        <button onclick="makeGuess('G')">G</button>
+        <button onclick="makeGuess('H')">H</button>
+        <button onclick="makeGuess('I')">I</button>
+        <button onclick="makeGuess('J')">J</button>
+        <button onclick="makeGuess('K')">K</button>
+        <button onclick="makeGuess('L')">L</button>
+        <button onclick="makeGuess('M')">M</button>
+        <button onclick="makeGuess('N')">N</button>
+        <button onclick="makeGuess('O')">O</button>
+        <button onclick="makeGuess('P')">P</button>
+        <button onclick="makeGuess('Q')">Q</button>
+        <button onclick="makeGuess('R')">R</button>
+        <button onclick="makeGuess('S')">S</button>
+        <button onclick="makeGuess('T')">T</button>
+        <button onclick="makeGuess('U')">U</button>
+        <button onclick="makeGuess('V')">V</button>
+        <button onclick="makeGuess('W')">W</button>
+        <button onclick="makeGuess('X')">X</button>
+        <button onclick="makeGuess('Y')">Y</button>
+        <button onclick="makeGuess('Z')">Z</button>
+    </div>
+    <!--My remaining Guess counter-->
+    <h3 id="remaining" style="text-align: center;font-family: Verdana, Geneva, Tahoma, sans-serif;">Remaining Guesses: 6</h3>
+    <!-- Creates the button to start a new game-->
+    <button class="new-word" onclick="startGame()">New Game</button>
+
+</body>
+</html>
